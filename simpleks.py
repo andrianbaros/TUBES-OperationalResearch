@@ -71,24 +71,32 @@ with tab1:
     ], dtype=float)
 
     def simplex_iteration(tableau):
+        # Find the pivot column (most negative in Z row)
         pivot_col = np.argmin(tableau[0, 1:-1]) + 1
+        
+        # Find the pivot row
         ratios = tableau[1:, -1] / tableau[1:, pivot_col]
-        ratios[tableau[1:, pivot_col] <= 0] = np.inf
+        ratios[tableau[1:, pivot_col] <= 0] = np.inf  # Ignore non-positive entries
         pivot_row = np.argmin(ratios) + 1
+        
+        # Perform pivot operation
         pivot_element = tableau[pivot_row, pivot_col]
-        tableau[pivot_row] /= pivot_element
+        tableau[pivot_row] /= pivot_element  # Normalize pivot row
+        
         for r in range(tableau.shape[0]):
             if r != pivot_row:
                 tableau[r] -= tableau[r, pivot_col] * tableau[pivot_row]
+        
         return pivot_col, pivot_row
 
     def solve_simplex(tableau):
         iterations = []
-        iteration = 0
-        while np.any(tableau[0, 1:-1] < 0):
+        while np.any(tableau[0, 1:-1] < 0):  # Iterate while there are negative elements in the Z row (excluding RHS)
             iterations.append(pd.DataFrame(tableau, columns=["Z", "x1", "x2", "s1", "s2", "s3", "s4", "s5", "RHS"]))
             pivot_col, pivot_row = simplex_iteration(tableau)
-            iteration += 1
+            # Check if the solution is already optimal
+            if not np.any(tableau[0, 1:-1] < 0):
+                break
         iterations.append(pd.DataFrame(tableau, columns=["Z", "x1", "x2", "s1", "s2", "s3", "s4", "s5", "RHS"]))
         return iterations
 
@@ -125,6 +133,34 @@ with tab1:
 
     st.subheader("Optimal Solution")
     st.write(optimal_solution)
+
+    # Display the conclusion
+    st.subheader("Kesimpulan Optimal Solution")
+    st.write("""
+        Berdasarkan hasil analisis linear programming melalui metode simpleks terhadap UKM Seblak Gaul milik Bapak Pitra yang berlokasi di Jl. Raya Serang-Jakarta, Penancangan, Kec. Cipocok Jaya, Kota Serang, Banten, diperoleh hasil sebagai berikut:
+        
+        - Jumlah Seblak Mie (x1): 3 porsi
+        - Jumlah Seblak Telur (x2): 0 porsi
+        - Nilai Fungsi Tujuan (Z): 75 (kali 10.000) atau setara dengan Rp 750.000
+        
+        Dari hasil perhitungan, nilai variabel pembatas adalah sebagai berikut:
+        - S1: 3 porsi
+        - S2: 197 bakso
+        - S3: 45 kerupuk
+        - S4: 429 telur
+        - S5: 476
+        
+        Interpretasi Hasil:
+        1. Keuntungan Maksimal: Untuk mencapai keuntungan maksimal sebesar Rp 750.000, UKM Seblak Gaul sebaiknya memproduksi seblak mie sebanyak 3 porsi. Dalam perhitungan ini, seblak telur tidak diproduksi karena batasan bahan baku yang ada.
+        2. Optimalisasi Produksi: Hasil ini menunjukkan bahwa dengan melakukan optimasi menggunakan metode simpleks, UKM Seblak Gaul dapat meningkatkan keuntungan dari sebelumnya. Adapun selisih keuntungan sebelum dan setelah optimasi adalah sebesar Rp 150.000.
+        
+        Rekomendasi:
+        1. Fokus Produksi: Berdasarkan hasil perhitungan, produksi seblak mie sebanyak 3 porsi adalah pilihan terbaik untuk mencapai keuntungan maksimal.
+        2. Pengelolaan Stok: Stok bahan baku perlu dikelola dengan baik untuk memastikan bahwa bahan yang tersedia cukup untuk memenuhi jumlah produksi yang optimal.
+        3. Penyesuaian dan Monitoring: Lakukan pemantauan secara rutin terhadap stok bahan baku dan kondisi pasar untuk memastikan bahwa produksi tetap berjalan optimal dan menguntungkan. Jika ada perubahan signifikan dalam stok atau permintaan pasar, perhitungan ulang dengan metode simpleks perlu dilakukan.
+        
+        Dengan mengikuti rekomendasi ini, UKM Seblak Gaul dapat meningkatkan efisiensi produksi dan mencapai keuntungan yang lebih optimal.
+    """)
 
 with tab2:
     st.title("Input Stok Tersedia Dinamis")
@@ -179,3 +215,31 @@ with tab2:
 
     st.subheader("Updated Optimal Solution")
     st.write(updated_optimal_solution)
+
+    # Display the updated conclusion
+    st.subheader("Updated Kesimpulan Optimal Solution")
+    st.write("""
+        Berdasarkan hasil analisis linear programming melalui metode simpleks terhadap UKM Seblak Gaul milik Bapak Pitra yang berlokasi di Jl. Raya Serang-Jakarta, Penancangan, Kec. Cipocok Jaya, Kota Serang, Banten, diperoleh hasil sebagai berikut:
+        
+        - Jumlah Seblak Mie (x1): 3 porsi
+        - Jumlah Seblak Telur (x2): 0 porsi
+        - Nilai Fungsi Tujuan (Z): 75 (kali 10.000) atau setara dengan Rp 750.000
+        
+        Dari hasil perhitungan, nilai variabel pembatas adalah sebagai berikut:
+        - S1: 3 porsi
+        - S2: 197 bakso
+        - S3: 45 kerupuk
+        - S4: 429 telur
+        - S5: 476
+        
+        Interpretasi Hasil:
+        1. Keuntungan Maksimal: Untuk mencapai keuntungan maksimal sebesar Rp 750.000, UKM Seblak Gaul sebaiknya memproduksi seblak mie sebanyak 3 porsi. Dalam perhitungan ini, seblak telur tidak diproduksi karena batasan bahan baku yang ada.
+        2. Optimalisasi Produksi: Hasil ini menunjukkan bahwa dengan melakukan optimasi menggunakan metode simpleks, UKM Seblak Gaul dapat meningkatkan keuntungan dari sebelumnya. Adapun selisih keuntungan sebelum dan setelah optimasi adalah sebesar Rp 150.000.
+        
+        Rekomendasi:
+        1. Fokus Produksi: Berdasarkan hasil perhitungan, produksi seblak mie sebanyak 3 porsi adalah pilihan terbaik untuk mencapai keuntungan maksimal.
+        2. Pengelolaan Stok: Stok bahan baku perlu dikelola dengan baik untuk memastikan bahwa bahan yang tersedia cukup untuk memenuhi jumlah produksi yang optimal.
+        3. Penyesuaian dan Monitoring: Lakukan pemantauan secara rutin terhadap stok bahan baku dan kondisi pasar untuk memastikan bahwa produksi tetap berjalan optimal dan menguntungkan. Jika ada perubahan signifikan dalam stok atau permintaan pasar, perhitungan ulang dengan metode simpleks perlu dilakukan.
+        
+        Dengan mengikuti rekomendasi ini, UKM Seblak Gaul dapat meningkatkan efisiensi produksi dan mencapai keuntungan yang lebih optimal.
+    """)
