@@ -73,6 +73,11 @@ with tab1:
         [0, 8, 10, 0, 0, 0, 0, 1, 500]            # Kerupuk Constraint
     ], dtype=float)
 
+       # Display initial tableau
+    st.title("Tabel Standar Simpleks")
+    st.table(pd.DataFrame(initial_tableau, columns=["Z", "x1", "x2", "s1", "s2", "s3", "s4", "s5", "RHS"]).astype(int))
+
+
     def simplex_iteration(tableau):
         pivot_col = np.argmin(tableau[0, 1:-1]) + 1  # Find the pivot column (most negative in Z row)
         ratios = tableau[1:, -1] / tableau[1:, pivot_col]  # Calculate ratios
@@ -92,28 +97,26 @@ with tab1:
 
     def solve_simplex(tableau):
         iterations = []
+        x = 1
         while np.any(tableau[0, 1:-1] < 0):  # Iterate while there are negative elements in the Z row (excluding RHS)
             iterations.append(pd.DataFrame(tableau, columns=["Z", "x1", "x2", "s1", "s2", "s3", "s4", "s5", "RHS"]))                
             tableau, pivot_col, pivot_row = simplex_iteration(tableau)
-            st.write(f"Pivot Column: {pivot_col}, Pivot Row: {pivot_row}")
-            st.write(pd.DataFrame(tableau, columns=["Z", "x1", "x2", "s1", "s2", "s3", "s4", "s5", "RHS"]))
-            if not np.any(tableau[0, 1:-1] < 0):
+            for i, df in enumerate(iterations): 
+                st.subheader("iteration" + str(i+x))    
+                st.write(pd.DataFrame(tableau, columns=["Z", "x1", "x2", "s1", "s2", "s3", "s4", "s5", "RHS"]))
+            if not np.any(tableau[0, 1:-1] < 0): 
                     break
+            x = x+1
         iterations.append(pd.DataFrame(tableau, columns=["Z", "x1", "x2", "s1", "s2", "s3", "s4", "s5", "RHS"]))
         return iterations
+    
     
     # Solve and get the iteration results
     iterations = solve_simplex(initial_tableau.copy())
     
-    # Display initial tableau
-    st.title("Tabel Standar Simpleks")
-    st.table(pd.DataFrame(initial_tableau, columns=["Z", "x1", "x2", "s1", "s2", "s3", "s4", "s5", "RHS"]).astype(int))
-
+ 
     # Display each iteration
-    for i, df in enumerate(iterations):
-        
-        st.subheader(f"Iteration {i+1}")
-        st.write(df)
+
 
     # Solving the problem using PuLP after displaying manual iterations
     prob.solve()
