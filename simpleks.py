@@ -141,80 +141,103 @@ with tab1:
         
         Dari hasil perhitungan, nilai variabel pembatas adalah sebagai berikut:
         - S1: 3 porsi
-        - S2: 197 bakso
-        - S3: 45 kerupuk
-        - S4: 429 telur
-        - S5: 476
+        - S2: 197 mie
+        - S3: 45 telur
+        - S4: 429 bakso
+        - S5: 476 kerupuk
         
         Interpretasi Hasil:
-        1. Keuntungan Maksimal: Untuk mencapai keuntungan maksimal sebesar Rp {optimal_solution['Maximum Z']}, UKM Seblak Gaul sebaiknya memproduksi seblak mie sebanyak {optimal_solution['x1']} porsi dan seblak telur sebanyak {optimal_solution['x2']} porsi.
-        2. Optimalisasi Produksi: Hasil ini menunjukkan bahwa dengan melakukan optimasi menggunakan metode PuLP, UKM Seblak Gaul dapat meningkatkan keuntungan dari sebelumnya.
+        1. Keuntungan Maksimal: Untuk mencapai keuntungan maksimal sebesar Rp.{optimal_solution['Maximum Z']*10000}, UKM Seblak Gaul sebaiknya memproduksi seblak mie dan seblak telur sebanyak {optimal_solution['x1']} porsi.
+        2. Optimalisasi Produksi: Hasil ini menunjukkan bahwa dengan melakukan optimasi menggunakan metode PuLP, UKM Seblak Gaul dapat meningkatkan keuntungan dari sebelumnya dengan selisih sebesar {(optimal_solution['Maximum Z']*10000)-600000}.
         
         Rekomendasi:
-        1. Fokus Produksi: Berdasarkan hasil perhitungan, produksi seblak mie sebanyak {optimal_solution['x1']} porsi dan seblak telur sebanyak {optimal_solution['x2']} porsi akan memberikan keuntungan maksimal. Disarankan untuk mengarahkan upaya produksi sesuai dengan hasil optimasi ini.
+        1. Fokus Produksi: Berdasarkan hasil perhitungan, produksi seblak mie porsi dan seblak telur sebanyak {optimal_solution['x1']}  akan memberikan keuntungan maksimal. Disarankan untuk mengarahkan upaya produksi sesuai dengan hasil optimasi ini.
         2. Pemantauan dan Evaluasi: Lakukan pemantauan berkala terhadap proses produksi dan evaluasi hasil penjualan untuk memastikan bahwa produksi berjalan sesuai dengan rencana optimasi.
     """)
 
 with tab2:
-    st.title("Input Stok Tersedia Dinamis")
-    bahan_list = ['porsi', 'mie', 'telur', 'bakso', 'kerupuk']
-    stok_tersedia = []
+    st.title("Optimisasi Dinamis")
 
-    for bahan in bahan_list:
-        stok = st.number_input(f"Stok tersedia untuk {bahan}", min_value=0, value=0, step=1)
-        stok_tersedia.append(stok)
+    st.subheader("Sesuaikan Parameter")
 
-    stok_data = {'bahan': bahan_list, 'stok tersedia': stok_tersedia}
-    stok_df = pd.DataFrame(stok_data)
+    # Input pengguna untuk menyesuaikan stok bahan baku
+    mie = st.slider("Stok Mie (maks 300)", min_value=0, max_value=300, value=200, step=1)
+    telur = st.slider("Stok Telur (maks 98)", min_value=0, max_value=98, value=48, step=1)
+    bakso = st.slider("Stok Bakso (maks 650)", min_value=0, max_value=650, value=450, step=1)
+    kerupuk = st.slider("Stok Kerupuk (maks 700)", min_value=0, max_value=700, value=500, step=1)
 
-    st.subheader("Stok Tersedia yang Dimasukkan:")
-    st.table(stok_df)
-
-    # Dynamic problem setup
-    prob = pulp.LpProblem("Seblak_Optimization_Dynamic", pulp.LpMaximize)
-
+    # Memperbarui kendala dengan nilai baru
+    prob = pulp.LpProblem("Optimisasi_Seblak", pulp.LpMaximize)
     x1 = pulp.LpVariable('x1', lowBound=0, cat='Integer')
     x2 = pulp.LpVariable('x2', lowBound=0, cat='Integer')
 
-    prob += 250000 * x1 + 350000 * x2, "Total Profit"
-
-    prob += 20 * x1 + 30 * x2 <= stok_tersedia[0], "Total Portions"
-    prob += x1 <= stok_tersedia[1], "Mie Constraint"
-    prob += x1 + x2 <= stok_tersedia[2], "Telur Constraint"
-    prob += 7 * x1 + 10 * x2 <= stok_tersedia[3], "Bakso Constraint"
-    prob += 8 * x1 + 10 * x2 <= stok_tersedia[4], "Kerupuk Constraint"
+    prob += 25 * x1 + 35 * x2, "Keuntungan Total"
+    prob += 20 * x1 + 30 * x2 <= 60, "Total Porsi"
+    prob += x1 <= mie, "Kendala Mie"
+    prob += x1 + x2 <= telur, "Kendala Telur"
+    prob += 7 * x1 + 10 * x2 <= bakso, "Kendala Bakso"
+    prob += 8 * x1 + 10 * x2 <= kerupuk, "Kendala Kerupuk"
 
     prob.solve()
 
-    updated_optimal_solution = {
+    # Menampilkan solusi optimal baru
+    dynamic_solution = {
         "x1": pulp.value(x1),
         "x2": pulp.value(x2),
-        "Maximum Z": pulp.value(prob.objective)
+        "Maksimum Z": pulp.value(prob.objective)
     }
 
-    st.subheader("Updated Optimal Solution")
-    st.write(updated_optimal_solution)
+    st.subheader("Solusi Optimal yang Diperbarui")
+    st.write(dynamic_solution)
 
-    st.subheader("Updated Kesimpulan Optimal Solution")
+    # Menampilkan iterasi Simpleks pada bagian dinamis
+    def simplex_iteration(tableau):
+        pivot_col = np.argmin(tableau[0, 1:-1]) + 1  # Find the pivot column (most negative in Z row)
+        ratios = tableau[1:, -1] / tableau[1:, pivot_col]  # Calculate ratios
+        ratios[tableau[1:, pivot_col] <= 0] = np.inf  # Ignore non-positive entries
+        pivot_row = np.argmin(ratios) + 1  # Find the pivot row
+        pivot_element = tableau[pivot_row, pivot_col]  # Find the pivot element
+
+        if pivot_element == 0:
+            st.write("Pivot element is zero, cannot proceed with iteration.")
+            return tableau
+
+        tableau[pivot_row] /= pivot_element  # Normalize pivot row
+        for r in range(tableau.shape[0]):
+            if r != pivot_row:
+                tableau[r] -= tableau[r, pivot_col] * tableau[pivot_row]  # Perform row operations
+        return tableau, pivot_col, pivot_row
+
+    def solve_simplex(tableau):
+        iterations = []
+        while np.any(tableau[0, 1:-1] < 0):  # Iterate while there are negative elements in the Z row (excluding RHS)
+            iterations.append(pd.DataFrame(tableau, columns=["Z", "x1", "x2", "s1", "s2", "s3", "s4", "s5", "RHS"]))                
+            tableau, pivot_col, pivot_row = simplex_iteration(tableau)
+            st.subheader(f"Iteration {len(iterations)}")
+            st.write(pd.DataFrame(tableau, columns=["Z", "x1", "x2", "s1", "s2", "s3", "s4", "s5", "RHS"]))
+            if not np.any(tableau[0, 1:-1] < 0): 
+                break
+        iterations.append(pd.DataFrame(tableau, columns=["Z", "x1", "x2", "s1", "s2", "s3", "s4", "s5", "RHS"]))
+        return iterations
+
+    # Tableau for the updated dynamic scenario
+    dynamic_tableau = np.array([
+        [1, -25, -35, 0, 0, 0, 0, 0, 0],  # Z row
+        [0, 20, 30, 1, 0, 0, 0, 0, 60],           # Total Portions
+        [0, 1, 0, 0, 1, 0, 0, 0, mie],            # Mie Constraint
+        [0, 1, 1, 0, 0, 1, 0, 0, telur],             # Telur Constraint
+        [0, 7, 10, 0, 0, 0, 1, 0, bakso],           # Bakso Constraint
+        [0, 8, 10, 0, 0, 0, 0, 1, kerupuk]            # Kerupuk Constraint
+    ], dtype=float)
+
+    st.subheader("Iterasi Simpleks")
+    iterations = solve_simplex(dynamic_tableau.copy())
+
+    st.subheader("Kesimpulan untuk Solusi yang Diperbarui")
     st.write(f"""
-        Berdasarkan hasil analisis linear programming melalui metode simpleks terhadap UKM Seblak Gaul milik Bapak Pitra yang berlokasi di Jl. Raya Serang-Jakarta, Penancangan, Kec. Cipocok Jaya, Kota Serang, Banten, diperoleh hasil sebagai berikut:
-        
-        - Jumlah Seblak Mie (x1): {updated_optimal_solution['x1']} porsi
-        - Jumlah Seblak Telur (x2): {updated_optimal_solution['x2']} porsi
-        - Nilai Fungsi Tujuan (Z): {updated_optimal_solution['Maximum Z']}
-        
-        Dari hasil perhitungan, nilai variabel pembatas adalah sebagai berikut:
-        - S1: 3 porsi
-        - S2: 197 bakso
-        - S3: 45 kerupuk
-        - S4: 429 telur
-        - S5: 476
-        
-        Interpretasi Hasil:
-        1. Keuntungan Maksimal: Untuk mencapai keuntungan maksimal sebesar Rp {updated_optimal_solution['Maximum Z']}, UKM Seblak Gaul sebaiknya memproduksi seblak mie sebanyak {updated_optimal_solution['x1']} porsi dan seblak telur sebanyak {updated_optimal_solution['x2']} porsi.
-        2. Optimalisasi Produksi: Hasil ini menunjukkan bahwa dengan melakukan optimasi menggunakan metode PuLP, UKM Seblak Gaul dapat meningkatkan keuntungan dari sebelumnya.
-        
-        Rekomendasi:
-        1. Fokus Produksi: Berdasarkan hasil perhitungan, produksi seblak mie sebanyak {updated_optimal_solution['x1']} porsi dan seblak telur sebanyak {updated_optimal_solution['x2']} porsi akan memberikan keuntungan maksimal. Disarankan untuk mengarahkan upaya produksi sesuai dengan hasil optimasi ini.
-        2. Pemantauan dan Evaluasi: Lakukan pemantauan berkala terhadap proses produksi dan evaluasi hasil penjualan untuk memastikan bahwa produksi berjalan sesuai dengan rencana optimasi.
+        Berdasarkan parameter yang diperbarui, solusi optimal berubah sebagai berikut:
+
+        - Seblak Mie (x1): {dynamic_solution['x1']} porsi
+        - Seblak Telur (x2): {dynamic_solution['x2']} porsi
+        - Keuntungan Maksimum (Z): {dynamic_solution['Maksimum Z']}
     """)
