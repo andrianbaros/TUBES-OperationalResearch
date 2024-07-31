@@ -5,4 +5,4 @@
 pip install -r requirements.txt
 
 # Run the Streamlit app
-streamlit run simpleks.py
+streamlit run ProgramOptimalisasKeuntunganProduksiMakananMenggunakanPemrogramanLinierMelaluiMetodeSimpleks.py

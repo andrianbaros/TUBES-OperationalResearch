@@ -12,7 +12,7 @@ Proyek ini adalah aplikasi Streamlit yang memungkinkan pengguna untuk memecahkan
 
 ## Cara Penggunaan
 
-1. Jalankan aplikasi Streamlit dengan perintah: `streamlit run app.py`.
+1. Jalankan aplikasi Streamlit dengan perintah: `streamlit run ProgramOptimalisasKeuntunganProduksiMakananMenggunakanPemrogramanLinierMelaluiMetodeSimpleks.py`.
 2. Aplikasi akan menampilkan tabel bahan dan stok yang tersedia.
 3. Aplikasi akan menampilkan fungsi tujuan dan fungsi pembatas dari masalah optimasi.
 4. Aplikasi akan menjalankan iterasi metode Simplex dan menampilkan setiap iterasi tabel Simplex.
