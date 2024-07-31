@@ -1,13 +1,3 @@
-Kelompok : 1
-Kelas : IF1
-Anggota :
-
-- 10122003 - Andrian Baros
-- 10122011 - Dida Aburahmani. D
-- 10122016 - M. Dhafin Putra R
-- 10122017 - M. Fathi Zaidan
-- 10122036 - Khotibul Umam
-
 # Seblak Black Simplex Solver
 
 Proyek ini adalah aplikasi Streamlit yang memungkinkan pengguna untuk memecahkan masalah optimasi linear menggunakan metode Simplex. Contoh yang digunakan dalam aplikasi ini adalah produksi dua jenis seblak: Seblak Mie dan Seblak Telur.
@@ -27,3 +17,7 @@ Proyek ini adalah aplikasi Streamlit yang memungkinkan pengguna untuk memecahkan
 3. Aplikasi akan menampilkan fungsi tujuan dan fungsi pembatas dari masalah optimasi.
 4. Aplikasi akan menjalankan iterasi metode Simplex dan menampilkan setiap iterasi tabel Simplex.
 5. Aplikasi akan menampilkan solusi optimal dari masalah optimasi.
+
+## Akses Aplikasi
+
+Akses aplikasi Streamlit Anda melalui link berikut: [Seblak Black Simplex Solver](https://kelompok1-optimasiprogramlinier.streamlit.app/)
