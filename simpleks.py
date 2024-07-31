@@ -241,3 +241,5 @@ with tab2:
         - Seblak Telur (x2): {dynamic_solution['x2']} porsi
         - Keuntungan Maksimum (Z): {dynamic_solution['Maksimum Z']}
     """)
+
+    
